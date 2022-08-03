@@ -1,7 +1,7 @@
-import { AuthLogin } from './auth-login';
+import { UserLogin } from './auth-login';
 
 describe('AuthLogin', () => {
   it('should be defined', () => {
-    expect(new AuthLogin()).toBeDefined();
+    expect(new UserLogin()).toBeDefined();
   });
 });

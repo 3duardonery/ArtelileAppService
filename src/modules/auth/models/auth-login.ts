@@ -1,4 +1,4 @@
-export class AuthLogin {
+export class UserLogin {
   username: string;
   password: string;
 }
