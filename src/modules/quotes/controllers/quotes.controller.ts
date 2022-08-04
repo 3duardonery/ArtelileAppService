@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpStatus,
   Post,
@@ -13,7 +14,6 @@ import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 import { QuotesService } from '../services/quotes.service';
 import { Response } from 'express';
 import { QuoteRequest } from '../models/quote';
-import { Filter } from '../models/filter';
 
 @Controller('api/quotes')
 export class QuotesController {
@@ -41,6 +41,16 @@ export class QuotesController {
 
     if (response) {
       res.status(HttpStatus.OK).json(response).send();
+    }
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete()
+  async cancelQuote(@Query('quoteId') quoteId: string, @Res() res: Response) {
+    const response = await this.quotesService.cancelQuote(quoteId);
+
+    if (response) {
+      res.status(HttpStatus.NO_CONTENT).json().send();
     }
   }
 }

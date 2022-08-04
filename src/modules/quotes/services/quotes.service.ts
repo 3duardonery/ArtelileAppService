@@ -1,7 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { model, Model } from 'mongoose';
-import { Filter } from '../models/filter';
+import { Model } from 'mongoose';
 import { QuoteRequest } from '../models/quote';
 import { Quote, QuoteDocument } from '../schemas/quote-schema';
 
@@ -39,5 +38,13 @@ export class QuotesService {
       pages: Math.ceil(total / limit),
       data: quotes,
     };
+  }
+
+  async cancelQuote(quoteId: string): Promise<any> {
+    return await this.model
+      .findByIdAndUpdate(quoteId, {
+        status: 'CANCELADO',
+      })
+      .exec();
   }
 }
