@@ -8,6 +8,7 @@ import { QuotesService } from './services/quotes.service';
 @Module({
   controllers: [QuotesController],
   providers: [QuotesService],
+  exports: [QuotesService],
   imports: [
     MongooseModule.forFeature([{ name: Quote.name, schema: QuoteSchema }]),
   ],

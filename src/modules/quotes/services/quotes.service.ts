@@ -47,4 +47,8 @@ export class QuotesService {
       })
       .exec();
   }
+
+  async findById(quoteId: string): Promise<QuoteDocument> {
+    return await this.model.findById(quoteId).exec();
+  }
 }
