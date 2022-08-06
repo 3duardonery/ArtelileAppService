@@ -20,7 +20,7 @@ export class AuthController {
 
   @Post()
   async auth(@Body() loginUser: UserLogin, @Res() res: Response) {
-    const verifyuser = await this.authService.findUser(loginUser.username);
+    const verifyuser = await this.authService.findUser(loginUser.email);
 
     if (verifyuser == undefined || verifyuser == null) {
       res
@@ -50,15 +50,15 @@ export class AuthController {
     res.status(HttpStatus.OK).json(response);
   }
 
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Post('create')
   async createUser(@Body() loginUser: UserLogin, @Res() res: Response) {
-    const verifyuser = await this.authService.findUser(loginUser.username);
+    const verifyuser = await this.authService.findUser(loginUser.email);
 
     if (verifyuser != undefined) {
       res
         .status(HttpStatus.BAD_REQUEST)
-        .json({ errorMessage: 'Username is already in use' })
+        .json({ errorMessage: 'Email is already in use' })
         .send();
 
       return;
@@ -67,7 +67,7 @@ export class AuthController {
     const hash = await this.createHash(loginUser.password);
 
     const response = await this.authService.createUser({
-      username: loginUser.username,
+      email: loginUser.email,
       password: hash,
     });
 
@@ -76,7 +76,7 @@ export class AuthController {
 
   @Patch()
   async updatePass(@Body() updateUser: UpdateLogin, @Res() res: Response) {
-    const user = await this.authService.findUser(updateUser.username);
+    const user = await this.authService.findUser(updateUser.email);
 
     if (user == undefined) {
       res

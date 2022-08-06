@@ -16,7 +16,9 @@ export class Order {
   @Prop({ default: new Date()})
   orderedAt: Date;
   @Prop()
-  dueAt: Date;
+  startedAt: Date;
+  @Prop()
+  deliveredAt: Date;
   @Prop()
   finishedAt: Date;
   @Prop()

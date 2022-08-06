@@ -29,7 +29,6 @@ export class QuotesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async getQuotes(
     @Query('limit') limit: number,

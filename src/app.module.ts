@@ -6,6 +6,7 @@ import { QuotesModule } from './modules/quotes/quotes.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { ReportsModule } from './modules/reports/reports.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { ConfigModule } from '@nestjs/config';
     OrdersModule,
     ConfigModule.forRoot(),
     MongooseModule.forRoot(`${process.env.CONNECTION}/${process.env.DATABASE}`),
+    ReportsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

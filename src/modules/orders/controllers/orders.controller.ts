@@ -7,12 +7,14 @@ import {
   Post,
   Query,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { QuotesService } from '../../quotes/services/quotes.service';
 import { OrderRequest } from '../models/order-request';
 import { OrdersService } from '../services/orders.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('api/orders')
 export class OrdersController {
   status: any[] = [
@@ -64,9 +66,17 @@ export class OrdersController {
     const nextStepIndex = this.status.find(
       (x) => x.status == order.status,
     )?.index;
-    const nextStepValue = this.status.find(
-      (x) => x.index == nextStepIndex + 1,
-    ).status;
+
+    if (nextStepIndex == 3) {
+      response
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Order is already delivered' })
+        .send();
+      return;
+    }
+
+    const nextStepValue =
+      this.status.find((x) => x.index == nextStepIndex + 1).status || '';
 
     const result = await this.orderService.updateStatus(
       order.id,
@@ -79,5 +89,16 @@ export class OrdersController {
     }
 
     response.status(HttpStatus.OK).json().send();
+  }
+
+  @Get()
+  async getPaginatedOrders(
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+    @Res() response: Response,
+  ) {
+    const orders = await this.orderService.getOrders(limit, page);
+
+    response.status(HttpStatus.OK).json(orders).send();
   }
 }

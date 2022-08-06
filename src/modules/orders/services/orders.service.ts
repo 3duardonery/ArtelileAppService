@@ -19,10 +19,49 @@ export class OrdersService {
   }
 
   async updateStatus(orderId: string, status: string): Promise<OrderDocument> {
-    return await this.model
-      .findByIdAndUpdate(orderId, {
+    let updateObject = {};
+
+    if (status == 'Em Execução') {
+      updateObject = {
         status: status,
+        startedAt: new Date(),
+      };
+    } else if (status == 'Produção Finalizada') {
+      updateObject = {
+        status: status,
+        finishedAt: new Date(),
+      };
+    } else if (status == 'Entregue') {
+      updateObject = {
+        status: status,
+        deliveredAt: new Date(),
+      };
+    } else {
+      updateObject = {
+        status: status,
+        finishedAt: new Date(),
+      };
+    }
+
+    return await this.model.findByIdAndUpdate(orderId, updateObject).exec();
+  }
+
+  async getOrders(limit: number, page: number): Promise<any> {
+    const total = (await this.model.find()).length;
+
+    const quotes = await this.model
+      .find()
+      .limit(limit)
+      .skip(limit * page)
+      .sort({
+        orderedAt: -1,
       })
       .exec();
+
+    return {
+      length: total,
+      pages: Math.ceil(total / limit),
+      data: quotes,
+    };
   }
 }
