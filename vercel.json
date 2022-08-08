@@ -3,7 +3,7 @@
   "name": "artelile-api",
   "builds": [
     {
-      "src": "dist/main.js",
+      "src": "package.json",
       "use": "@vercel/node"
     }
   ],
