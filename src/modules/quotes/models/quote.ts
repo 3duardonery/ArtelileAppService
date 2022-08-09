@@ -1,6 +1,5 @@
 /* eslint-disable prettier/prettier */
 export class QuoteRequest {
-  id?: string;
   name?: string;
   createdAt?: Date;
   dueAt?: Date;

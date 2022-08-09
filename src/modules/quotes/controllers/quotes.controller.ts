@@ -25,10 +25,13 @@ export class QuotesController {
     console.log(response);
 
     if (response) {
-      res.status(HttpStatus.ACCEPTED).json(response).send();
+      res.status(HttpStatus.CREATED).json(response).send();
+    } else {
+      res.status(HttpStatus.NOT_ACCEPTABLE).json().send();
     }
   }
 
+  @UseGuards(JwtAuthGuard)
   @Get()
   async getQuotes(
     @Query('limit') limit: number,
@@ -37,9 +40,7 @@ export class QuotesController {
   ) {
     const response = await this.quotesService.getQuotes(limit, page);
 
-    if (response) {
-      res.status(HttpStatus.OK).json(response).send();
-    }
+    res.status(HttpStatus.OK).json(response).send();
   }
 
   @UseGuards(JwtAuthGuard)

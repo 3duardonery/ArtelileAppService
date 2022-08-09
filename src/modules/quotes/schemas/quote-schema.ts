@@ -13,7 +13,7 @@ export class Quote {
   @Prop({ default: new Date() })
   createdAt: Date;
 
-  @Prop({ required: true })
+  @Prop()
   dueAt: Date;
 
   @Prop({ required: true })
@@ -32,7 +32,7 @@ export class Quote {
   items?: QuoteItem[];
 
   @Prop()
-  deliveryDateils?: DeliveryDetails;
+  deliveryDetails?: DeliveryDetails;
 
   @Prop()
   totalValue?: number;
