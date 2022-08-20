@@ -22,7 +22,6 @@ export class QuotesController {
   @Post()
   async createQuote(@Body() quote: QuoteRequest, @Res() res: Response) {
     const response = await this.quotesService.createQuote(quote);
-    console.log(response);
 
     if (response) {
       res.status(HttpStatus.CREATED).json(response).send();
@@ -40,7 +39,7 @@ export class QuotesController {
   ) {
     const response = await this.quotesService.getQuotes(limit, page);
 
-    res.status(HttpStatus.OK).json(response).send();
+    return res.status(HttpStatus.OK).json(response);
   }
 
   @UseGuards(JwtAuthGuard)

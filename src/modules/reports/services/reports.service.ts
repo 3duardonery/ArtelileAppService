@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Order, OrderDocument } from '../../orders/schemas/order-schema';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 import * as Sentry from '@sentry/node';
 import { Quote, QuoteDocument } from '../../quotes/schemas/quote-schema';
 
@@ -12,16 +12,9 @@ export class ReportsService {
     @InjectModel(Quote.name) private readonly quote: Model<QuoteDocument>,
   ) {}
 
-  async getOrderReport(
-    startDate: string,
-    endDate: string,
-    status: string,
-  ): Promise<any> {
+  async getOrderReport(filter: FilterQuery<OrderDocument>): Promise<any> {
     try {
-      const response = await this.order.find({
-        orderedAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
-        status: status,
-      });
+      const response = await this.order.find(filter);
 
       const t = response.reduce(
         (total, order) => total + order.quote.totalValue,
@@ -39,22 +32,18 @@ export class ReportsService {
     }
   }
 
-  async getQuoteReport(
-    startDate: string,
-    endDate: string,
-    status: string,
-  ): Promise<any> {
+  async getQuoteReport(filter: FilterQuery<QuoteDocument>): Promise<any> {
     try {
-      const response = await this.quote.find({
-        createdAt: { $gte: new Date(startDate), $lte: new Date(endDate) },
-        status: status,
-      });
+      const response = await this.quote.find(filter);
 
-      const t = response.reduce((total, order) => total + order.totalValue, 0);
+      const totalSold = response.reduce(
+        (total, order) => total + order.totalValue,
+        0,
+      );
 
       return {
         length: response.length,
-        sold: t,
+        sold: totalSold,
         data: response,
       };
     } catch (e) {
