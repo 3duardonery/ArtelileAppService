@@ -39,4 +39,5 @@ export class DeliveryDetails {
 export class Tax {
   provider: string;
   price: number;
+  priceValue?: string;
 }

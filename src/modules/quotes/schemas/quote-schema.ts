@@ -39,6 +39,9 @@ export class Quote {
 
   @Prop()
   itemsValue?: number;
+
+  @Prop()
+  deliveryValue?: number;
 }
 
 export const QuoteSchema = SchemaFactory.createForClass(Quote);

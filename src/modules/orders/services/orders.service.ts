@@ -11,7 +11,9 @@ export class OrdersService {
   ) {}
 
   async createOrder(order: OrderRequest): Promise<OrderDocument> {
-    return await new this.model({ ...order }).save();
+    return await new this.model({
+      ...order,
+    }).save();
   }
 
   async findOrderById(orderId: string): Promise<OrderDocument> {

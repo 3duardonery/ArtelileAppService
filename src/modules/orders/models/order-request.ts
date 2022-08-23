@@ -11,6 +11,7 @@ export class OrderRequest {
 }
 
 export class PaymentWay {
+  total: string;
   payment: Payment[];
   isSplited: boolean;
 }

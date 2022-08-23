@@ -43,6 +43,14 @@ export class QuotesController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('id')
+  async getQuotesById(@Query('quoteId') quoteId: string, @Res() res: Response) {
+    const response = await this.quotesService.getQuoteById(quoteId);
+
+    return res.status(HttpStatus.OK).json(response);
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Delete()
   async cancelQuote(@Query('quoteId') quoteId: string, @Res() res: Response) {
     const response = await this.quotesService.cancelQuote(quoteId);

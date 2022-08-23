@@ -48,6 +48,10 @@ export class QuotesService {
       .exec();
   }
 
+  async getQuoteById(quoteId: string): Promise<any> {
+    return await this.model.findById(quoteId).exec();
+  }
+
   async findById(quoteId: string): Promise<QuoteDocument> {
     return await this.model.findById(quoteId).exec();
   }
