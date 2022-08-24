@@ -13,7 +13,7 @@ export class OrderRequest {
 export class PaymentWay {
   total: string;
   payment: Payment[];
-  isSplited: boolean;
+  isFullValue: boolean;
 }
 
 export class Payment {

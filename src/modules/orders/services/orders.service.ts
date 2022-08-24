@@ -3,14 +3,22 @@ import { OrderRequest } from '../models/order-request';
 import { Order, OrderDocument } from '../schemas/order-schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Quote, QuoteDocument } from 'src/modules/quotes/schemas/quote-schema';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private readonly model: Model<OrderDocument>,
+    @InjectModel(Quote.name) private readonly quote: Model<QuoteDocument>,
   ) {}
 
   async createOrder(order: OrderRequest): Promise<OrderDocument> {
+    await this.quote
+      .findByIdAndUpdate(order.quoteId, {
+        status: 'Pedido Realizado',
+      })
+      .exec();
+
     return await new this.model({
       ...order,
     }).save();
