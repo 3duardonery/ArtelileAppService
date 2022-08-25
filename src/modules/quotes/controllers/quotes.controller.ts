@@ -56,7 +56,7 @@ export class QuotesController {
     const response = await this.quotesService.cancelQuote(quoteId);
 
     if (response) {
-      res.status(HttpStatus.NO_CONTENT).json().send();
+      res.status(HttpStatus.NO_CONTENT).json();
     }
   }
 }

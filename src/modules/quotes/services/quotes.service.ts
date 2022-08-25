@@ -25,7 +25,7 @@ export class QuotesService {
     const total = (await this.model.find()).length;
 
     const quotes = await this.model
-      .find()
+      .find({ status: { $ne: 'Cancelado' } })
       .limit(limit)
       .skip(limit * page)
       .sort({
@@ -43,7 +43,7 @@ export class QuotesService {
   async cancelQuote(quoteId: string): Promise<any> {
     return await this.model
       .findByIdAndUpdate(quoteId, {
-        status: 'CANCELADO',
+        status: 'Cancelado',
       })
       .exec();
   }
