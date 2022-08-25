@@ -50,7 +50,7 @@ export class AuthController {
     res.status(HttpStatus.OK).json(response);
   }
 
-  //@UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard)
   @Post('create')
   async createUser(@Body() loginUser: UserLogin, @Res() res: Response) {
     const verifyuser = await this.authService.findUser(loginUser.email);
