@@ -74,4 +74,8 @@ export class OrdersService {
       data: quotes,
     };
   }
+
+  async getOrderById(orderId: string): Promise<any> {
+    return await this.model.findById(orderId).exec();
+  }
 }

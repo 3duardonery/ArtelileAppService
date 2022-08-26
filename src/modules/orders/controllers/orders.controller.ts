@@ -3,6 +3,7 @@ import {
   Controller,
   Get,
   HttpStatus,
+  Param,
   Patch,
   Post,
   Query,
@@ -51,9 +52,9 @@ export class OrdersController {
     return response.status(HttpStatus.CREATED).json(result).send();
   }
 
-  @Patch('status')
+  @Post('status/:orderId')
   async updateOrderStatusForNextStep(
-    @Query('orderId') orderId: string,
+    @Param('orderId') orderId: string,
     @Res() response: Response,
   ) {
     const order = await this.orderService.findOrderById(orderId);
@@ -87,8 +88,9 @@ export class OrdersController {
       response.status(HttpStatus.BAD_REQUEST).json().send();
       return;
     }
+    console.log(result);
 
-    response.status(HttpStatus.OK).json().send();
+    response.status(HttpStatus.OK).json(result);
   }
 
   @Get()
@@ -99,6 +101,16 @@ export class OrdersController {
   ) {
     const orders = await this.orderService.getOrders(limit, page);
 
-    response.status(HttpStatus.OK).json(orders).send();
+    response.status(HttpStatus.OK).json(orders);
+  }
+
+  @Get(':orderId')
+  async getOrderById(
+    @Param('orderId') orderId: string,
+    @Res() response: Response,
+  ) {
+    const orders = await this.orderService.getOrderById(orderId);
+
+    response.status(HttpStatus.OK).json(orders);
   }
 }
