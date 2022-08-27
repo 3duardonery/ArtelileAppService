@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { OrderRequest } from '../models/order-request';
+import { OrderRequest, PaymentWay } from '../models/order-request';
 import { Order, OrderDocument } from '../schemas/order-schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -52,6 +52,20 @@ export class OrdersService {
         finishedAt: new Date(),
       };
     }
+
+    return await this.model.findByIdAndUpdate(orderId, updateObject).exec();
+  }
+
+  async finishOrder(
+    orderId: string,
+    paymentWay: PaymentWay,
+  ): Promise<OrderDocument> {
+    let updateObject = {};
+    updateObject = {
+      status: 'Entregue',
+      deliveriedAt: new Date(),
+      paymentWay: paymentWay,
+    };
 
     return await this.model.findByIdAndUpdate(orderId, updateObject).exec();
   }

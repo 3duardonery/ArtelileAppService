@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Response } from 'express';
-import { OrderRequest } from '../models/order-request';
+import { OrderRequest, PaymentWay } from '../models/order-request';
 import { OrdersService } from '../services/orders.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
 
@@ -88,9 +88,19 @@ export class OrdersController {
       response.status(HttpStatus.BAD_REQUEST).json().send();
       return;
     }
-    console.log(result);
 
     response.status(HttpStatus.OK).json(result);
+  }
+
+  @Post('finish/:orderId')
+  async finishOrder(
+    @Body() paymentWay: PaymentWay,
+    @Param('orderId') orderId: string,
+    @Res() response: Response,
+  ) {
+    const order = await this.orderService.finishOrder(orderId, paymentWay);
+
+    response.status(HttpStatus.OK).json(order);
   }
 
   @Get()
