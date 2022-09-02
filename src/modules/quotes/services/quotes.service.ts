@@ -48,6 +48,10 @@ export class QuotesService {
       .exec();
   }
 
+  async updateQuote(quote: QuoteRequest): Promise<any> {
+    return await this.model.findByIdAndUpdate(quote._id, quote).exec();
+  }
+
   async getQuoteById(quoteId: string): Promise<any> {
     return await this.model.findById(quoteId).exec();
   }
