@@ -79,7 +79,7 @@ export class OrdersService {
       paymentWay: paymentWay,
     };
 
-    if (!lastPayment.isFullValue) {
+    if (lastPayment && !lastPayment.isFullValue) {
       await new this.payment({ ...lastPayment }).save();
     }
 

@@ -117,13 +117,17 @@ export class OrdersController {
 
     const orderPayments = await this.orderService.findOrderById(orderId);
 
-    const paymentRecord: PaymentRequest = {
-      value: lastPayment.value,
-      provider: lastPayment.provider,
-      isPaymentFinished: paymentTotal == orderPayments.quote.totalValue,
-      isFullValue: paymentWay.isFullValue,
-      orderId: orderId,
-    };
+    let paymentRecord: PaymentRequest = null;
+
+    if (lastPayment) {
+      paymentRecord = {
+        value: lastPayment?.value,
+        provider: lastPayment?.provider,
+        isPaymentFinished: paymentTotal == orderPayments.quote.totalValue,
+        isFullValue: paymentWay.isFullValue,
+        orderId: orderId,
+      };
+    }
 
     const order = await this.orderService.finishOrder(
       orderId,
