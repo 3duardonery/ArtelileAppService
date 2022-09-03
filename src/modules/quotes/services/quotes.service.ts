@@ -22,7 +22,8 @@ export class QuotesService {
   }
 
   async getQuotes(limit: number, page: number): Promise<any> {
-    const total = (await this.model.find()).length;
+    const total = (await this.model.find({ status: { $ne: 'Cancelado' } }))
+      .length;
 
     const quotes = await this.model
       .find({ status: { $ne: 'Cancelado' } })
