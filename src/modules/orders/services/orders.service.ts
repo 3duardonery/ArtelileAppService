@@ -27,6 +27,7 @@ export class OrdersService {
 
     const orderResponse = await new this.model({
       ...order,
+      deliveredAt: null,
     }).save();
 
     payment.orderId = orderResponse._id;
@@ -54,6 +55,8 @@ export class OrdersService {
         finishedAt: new Date(),
       };
     } else if (status == 'Entregue') {
+      console.log(status);
+
       updateObject = {
         status: status,
         deliveredAt: new Date(),
@@ -75,7 +78,7 @@ export class OrdersService {
   ): Promise<OrderDocument> {
     const updateObject = {
       status: 'Entregue',
-      deliveriedAt: new Date(),
+      deliveredAt: new Date(),
       paymentWay: paymentWay,
     };
 
