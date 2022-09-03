@@ -128,8 +128,8 @@ export class ReportsController {
         },
       },
       date: {
-        firstDay: this.timeLimits.firstDay.toLocaleDateString(),
-        lastDay: this.timeLimits.lastDay.toLocaleDateString(),
+        firstDay: this.timeLimits.firstDay.toLocaleDateString('pt-BR'),
+        lastDay: this.timeLimits.lastDay.toLocaleDateString('pt-BR'),
       },
     });
   }
