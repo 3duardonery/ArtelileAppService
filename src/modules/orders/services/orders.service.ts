@@ -4,24 +4,36 @@ import { Order, OrderDocument } from '../schemas/order-schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Quote, QuoteDocument } from 'src/modules/quotes/schemas/quote-schema';
+import { Payment, PaymentDocument } from '../schemas/payment-schema';
+import { PaymentRequest } from '../models/payment-request';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private readonly model: Model<OrderDocument>,
     @InjectModel(Quote.name) private readonly quote: Model<QuoteDocument>,
+    @InjectModel(Payment.name) private readonly payment: Model<PaymentDocument>,
   ) {}
 
-  async createOrder(order: OrderRequest): Promise<OrderDocument> {
+  async createOrder(
+    order: OrderRequest,
+    payment: PaymentRequest,
+  ): Promise<OrderDocument> {
     await this.quote
       .findByIdAndUpdate(order.quoteId, {
         status: 'Pedido Realizado',
       })
       .exec();
 
-    return await new this.model({
+    const orderResponse = await new this.model({
       ...order,
     }).save();
+
+    payment.orderId = orderResponse._id;
+
+    await new this.payment({ ...payment }).save();
+
+    return orderResponse;
   }
 
   async findOrderById(orderId: string): Promise<OrderDocument> {
@@ -59,13 +71,17 @@ export class OrdersService {
   async finishOrder(
     orderId: string,
     paymentWay: PaymentWay,
+    lastPayment: PaymentRequest,
   ): Promise<OrderDocument> {
-    let updateObject = {};
-    updateObject = {
+    const updateObject = {
       status: 'Entregue',
       deliveriedAt: new Date(),
       paymentWay: paymentWay,
     };
+
+    if (!lastPayment.isFullValue) {
+      await new this.payment({ ...lastPayment }).save();
+    }
 
     return await this.model.findByIdAndUpdate(orderId, updateObject).exec();
   }

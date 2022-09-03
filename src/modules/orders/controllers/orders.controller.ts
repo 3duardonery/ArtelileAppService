@@ -4,7 +4,6 @@ import {
   Get,
   HttpStatus,
   Param,
-  Patch,
   Post,
   Query,
   Res,
@@ -14,6 +13,7 @@ import { Response } from 'express';
 import { OrderRequest, PaymentWay } from '../models/order-request';
 import { OrdersService } from '../services/orders.service';
 import { JwtAuthGuard } from '../../auth/guards/jwt.guard';
+import { PaymentRequest } from '../models/payment-request';
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/orders')
@@ -47,7 +47,19 @@ export class OrdersController {
     @Body() orderRequest: OrderRequest,
     @Res() response: Response,
   ) {
-    const result = await this.orderService.createOrder(orderRequest);
+    const payment = orderRequest.paymentWay.payment[0];
+    const paymentRecord: PaymentRequest = {
+      value: payment.value,
+      provider: payment.provider,
+      isPaymentFinished: payment.value == orderRequest.quote.totalValue,
+      isFullValue: orderRequest.paymentWay.isFullValue,
+      orderId: null,
+    };
+
+    const result = await this.orderService.createOrder(
+      orderRequest,
+      paymentRecord,
+    );
 
     return response.status(HttpStatus.CREATED).json(result).send();
   }
@@ -98,7 +110,26 @@ export class OrdersController {
     @Param('orderId') orderId: string,
     @Res() response: Response,
   ) {
-    const order = await this.orderService.finishOrder(orderId, paymentWay);
+    const lastPayment = paymentWay.isFullValue ? null : paymentWay.payment[1];
+
+    const paymentTotal =
+      paymentWay?.payment?.reduce((total, a) => total + a?.value, 0) || 0;
+
+    const orderPayments = await this.orderService.findOrderById(orderId);
+
+    const paymentRecord: PaymentRequest = {
+      value: lastPayment.value,
+      provider: lastPayment.provider,
+      isPaymentFinished: paymentTotal == orderPayments.quote.totalValue,
+      isFullValue: paymentWay.isFullValue,
+      orderId: orderId,
+    };
+
+    const order = await this.orderService.finishOrder(
+      orderId,
+      paymentWay,
+      paymentRecord,
+    );
 
     response.status(HttpStatus.OK).json(order);
   }

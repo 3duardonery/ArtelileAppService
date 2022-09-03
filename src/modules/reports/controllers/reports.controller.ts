@@ -12,10 +12,13 @@ import { Response } from 'express';
 import { FilterQuery } from 'mongoose';
 import { QuoteDocument } from 'src/modules/quotes/schemas/quote-schema';
 import { OrderDocument } from 'src/modules/orders/schemas/order-schema';
+import { PaymentDocument } from 'src/modules/orders/schemas/payment-schema';
 
 @UseGuards(JwtAuthGuard)
 @Controller('api/reports')
 export class ReportsController {
+  timeLimits: any;
+
   constructor(private reportService: ReportsService) {}
 
   @Get('orders')
@@ -53,27 +56,36 @@ export class ReportsController {
 
   @Get('dashboard')
   async getDashboardInfo(@Res() response) {
-    const timeLimits = this.getCurrentMonthLimits();
+    this.timeLimits = this.getCurrentMonthLimits();
 
     const quoteFilter: FilterQuery<QuoteDocument> = {
       createdAt: {
-        $gte: new Date(timeLimits.firstDay),
-        $lte: new Date(timeLimits.lastDay),
+        $gte: new Date(this.timeLimits.firstDay),
+        $lte: new Date(this.timeLimits.lastDay),
       },
     };
 
     const orderFilter: FilterQuery<OrderDocument> = {
-      createdAt: { $gte: timeLimits.firstDay, $lte: timeLimits.lastDay },
+      orderedAt: {
+        $gte: this.timeLimits.firstDay,
+        $lte: this.timeLimits.lastDay,
+      },
+    };
+
+    const moneyFilter: FilterQuery<PaymentDocument> = {
+      paidAt: {
+        $gte: new Date(this.timeLimits.firstDay),
+        $lte: new Date(this.timeLimits.lastDay),
+      },
     };
 
     const quotes = await this.reportService.getQuoteReport(quoteFilter);
     const orders = await this.reportService.getOrderReport(orderFilter);
-
-    const money = this.getMoney(orders.data);
+    const payment = await this.reportService.getMoneyReportMonth(moneyFilter);
 
     response.status(HttpStatus.OK).json({
       money: {
-        received: money,
+        received: payment.sold,
         spend: 0,
       },
       quotes: {
@@ -115,22 +127,44 @@ export class ReportsController {
           data: orders.data.filter((x) => x.status == 'Entregue'),
         },
       },
+      date: {
+        firstDay: this.timeLimits.firstDay.toLocaleDateString(),
+        lastDay: this.timeLimits.lastDay.toLocaleDateString(),
+      },
     });
   }
 
   getCurrentMonthLimits(): any {
     const now = new Date();
     const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 23, 59, 59);
-    return { firstDay: firstDay, lastDay: lastDay };
+    const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    return { firstDay: firstDay as Date, lastDay: lastDay as Date };
   }
 
-  getMoney(orders: OrderDocument[]): number {
-    let result = 0;
-    orders?.forEach((x) => {
-      result +=
-        x.paymentWay?.payment?.reduce((total, a) => total + a?.value, 0) || 0;
-    });
-    return result;
-  }
+  // getMoney(orders: OrderDocument[]): number {
+  //   let result = 0;
+  //   orders?.forEach((x) => {
+  //     // result +=
+  //     //   x.paymentWay?.payment?.reduce((total, a) => total + a?.value, 0) || 0;
+  //     const value = this.getPaymentRecord(x.paymentWay.payment);
+  //     result += value;
+  //   });
+  //   return result;
+  // }
+
+  // getPaymentRecord(payment: Payment[]): number {
+  //   let result = 0;
+  //   payment.forEach((p) => {
+  //     const paid = new Date(p.paidAt);
+  //     if (
+  //       paid.toLocaleDateString() >
+  //         this.timeLimits.firstDay.toLocaleDateString() ||
+  //       paid < this.timeLimits.lastDay
+  //     ) {
+  //       result += p.value;
+  //       console.log(p);
+  //     }
+  //   });
+  //   return result;
+  // }
 }

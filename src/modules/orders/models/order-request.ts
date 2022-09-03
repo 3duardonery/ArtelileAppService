@@ -18,6 +18,6 @@ export class PaymentWay {
 
 export class Payment {
   value: number;
-  paidAt: Date;
+  paidAt: Date = new Date();
   provider: string;
 }
