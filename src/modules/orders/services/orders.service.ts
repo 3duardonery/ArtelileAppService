@@ -6,6 +6,8 @@ import { Model } from 'mongoose';
 import { Quote, QuoteDocument } from 'src/modules/quotes/schemas/quote-schema';
 import { Payment, PaymentDocument } from '../schemas/payment-schema';
 import { PaymentRequest } from '../models/payment-request';
+import { OrderResponse } from '../models/order-response';
+import { OrderStatus } from '../utils/order-status';
 
 @Injectable()
 export class OrdersService {
@@ -21,7 +23,7 @@ export class OrdersService {
   ): Promise<OrderDocument> {
     await this.quote
       .findByIdAndUpdate(order.quoteId, {
-        status: 'Pedido Realizado',
+        status: OrderStatus.ORDER_MADE,
       })
       .exec();
 
@@ -44,19 +46,17 @@ export class OrdersService {
   async updateStatus(orderId: string, status: string): Promise<OrderDocument> {
     let updateObject = {};
 
-    if (status == 'Em Execução') {
+    if (status == OrderStatus.IN_EXECUTION) {
       updateObject = {
         status: status,
         startedAt: new Date(),
       };
-    } else if (status == 'Produção Finalizada') {
+    } else if (status == OrderStatus.PRODUCTION_FINISHED) {
       updateObject = {
         status: status,
         finishedAt: new Date(),
       };
-    } else if (status == 'Entregue') {
-      console.log(status);
-
+    } else if (status == OrderStatus.DELIVERIED) {
       updateObject = {
         status: status,
         deliveredAt: new Date(),
@@ -77,7 +77,7 @@ export class OrdersService {
     lastPayment: PaymentRequest,
   ): Promise<OrderDocument> {
     const updateObject = {
-      status: 'Entregue',
+      status: OrderStatus.DELIVERIED,
       deliveredAt: new Date(),
       paymentWay: paymentWay,
     };
@@ -89,7 +89,7 @@ export class OrdersService {
     return await this.model.findByIdAndUpdate(orderId, updateObject).exec();
   }
 
-  async getOrders(limit: number, page: number): Promise<any> {
+  async getOrders(limit: number, page: number): Promise<OrderResponse> {
     const total = (await this.model.find()).length;
 
     const quotes = await this.model
@@ -101,14 +101,16 @@ export class OrdersService {
       })
       .exec();
 
-    return {
+    const response: OrderResponse = {
       length: total,
       pages: Math.ceil(total / limit),
       data: quotes,
     };
+
+    return response;
   }
 
-  async getOrderById(orderId: string): Promise<any> {
+  async getOrderById(orderId: string): Promise<OrderDocument> {
     return await this.model.findById(orderId).exec();
   }
 }
