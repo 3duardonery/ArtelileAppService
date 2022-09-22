@@ -8,7 +8,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
+import { JwtAuthGuard } from '../../../modules/auth/guards/jwt.guard';
 import { PurchaseRequest } from '../models/purchase-request';
 import { PurchasesService } from '../services/purchases.service';
 import { Response } from 'express';

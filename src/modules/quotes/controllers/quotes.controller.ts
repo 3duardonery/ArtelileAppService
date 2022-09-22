@@ -10,16 +10,16 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 import { QuotesService } from '../services/quotes.service';
 import { Response } from 'express';
 import { QuoteRequest } from '../models/quote';
+import { JwtAuthGuard } from 'src/modules/auth/guards/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('api/quotes')
 export class QuotesController {
   constructor(private quotesService: QuotesService) {}
 
-  @UseGuards(JwtAuthGuard)
   @Post()
   async createQuote(@Body() quote: QuoteRequest, @Res() res: Response) {
     const response = await this.quotesService.createQuote(quote);
@@ -31,7 +31,6 @@ export class QuotesController {
     }
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get()
   async getQuotes(
     @Query('limit') limit: number,
@@ -43,7 +42,6 @@ export class QuotesController {
     return res.status(HttpStatus.OK).json(response);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Get('id')
   async getQuotesById(@Query('quoteId') quoteId: string, @Res() res: Response) {
     const response = await this.quotesService.getQuoteById(quoteId);
@@ -51,7 +49,6 @@ export class QuotesController {
     return res.status(HttpStatus.OK).json(response);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Put()
   async updateQuote(@Body() quote: QuoteRequest, @Res() res: Response) {
     const response = await this.quotesService.updateQuote(quote);
@@ -59,7 +56,6 @@ export class QuotesController {
     return res.status(HttpStatus.OK).json(response);
   }
 
-  @UseGuards(JwtAuthGuard)
   @Delete()
   async cancelQuote(@Query('quoteId') quoteId: string, @Res() res: Response) {
     const response = await this.quotesService.cancelQuote(quoteId);

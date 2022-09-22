@@ -1,5 +1,7 @@
 /* eslint-disable prettier/prettier */
-export class Question {
+
+export class QuestionRequest {
   type: string;
   question: string;
+  value: number;
 }

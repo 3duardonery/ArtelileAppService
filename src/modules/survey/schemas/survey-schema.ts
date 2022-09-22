@@ -1,14 +1,14 @@
 /* eslint-disable prettier/prettier */
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
-import { Question } from '../models/question';
+import { QuestionResponse } from '../models/question-response';
 
 export type SurveyDocument = Survey & Document;
 
 @Schema()
 export class Survey {
   @Prop({ required: true })
-  order_id: string;
+  orderId: string;
 
   @Prop({ required: true })
   url: string;
@@ -20,10 +20,13 @@ export class Survey {
   finishAt: Date;
 
   @Prop()
+  isFinishedOrDue: boolean;
+
+  @Prop()
   dueAt: Date;
 
   @Prop()
-  questions: Question[];
+  questions: QuestionResponse[];
 
   @Prop()
   feedback: string;
