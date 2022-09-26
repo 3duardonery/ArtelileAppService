@@ -8,7 +8,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 import { ReportsModule } from './modules/reports/reports.module';
 import { SurveyModule } from './modules/survey/survey.module';
-import { PurchasesController } from './modules/purchases/controllers/purchases.controller';
 import { PurchasesModule } from './modules/purchases/purchases.module';
 
 @Module({

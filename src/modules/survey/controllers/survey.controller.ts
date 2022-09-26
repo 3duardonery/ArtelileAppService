@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import {
   Body,
   Controller,
@@ -32,6 +33,13 @@ export class SurveyController {
     }
 
     res.status(HttpStatus.OK).json(response).send();
+  }
+
+  @Get('validate')
+  async validateOrder(@Query('orderId') orderId: string, @Res() res: Response) {
+    const response = await this.surveyService.validateOrder(orderId);
+
+    return res.status(HttpStatus.OK).json(response).send();
   }
 
   @UseGuards(JwtAuthGuard)

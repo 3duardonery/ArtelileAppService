@@ -10,6 +10,8 @@ export class Question {
   type: string;
   @Prop({ required: true })
   question: string;
+  @Prop()
+  value: number;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(Question);

@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+/* eslint-disable prettier/prettier */
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import mongoose, { isValidObjectId, Model } from 'mongoose';
+import { isValidObjectId, Model } from 'mongoose';
 import { Order, OrderDocument } from 'src/modules/orders/schemas/order-schema';
 import { OrderStatus } from 'src/modules/orders/utils/order-status';
 import { QuestionRequest } from '../models/question-create-request';
@@ -47,20 +48,34 @@ export class SurveyService {
   async startSurvey(orderId: string): Promise<any> {
     try {
       if (!isValidObjectId(orderId)) {
-        return null;
+        throw new HttpException('OrderId is invalid', HttpStatus.BAD_REQUEST);
       }
 
       const orderIsFinished = await this.orders.findById(orderId).exec();
 
       if (orderIsFinished.status != OrderStatus.DELIVERIED) {
-        return null;
+        throw new HttpException(
+          'The survey cannot be started',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      const surveyForOrderIsExists = await this.surveys
+        .findOne({ orderId: orderId })
+        .exec();
+
+      if (surveyForOrderIsExists) {
+        throw new HttpException(
+          'Survey already exists',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       const questions = await this.getQuestions();
       const survey = {
         questions: questions,
         orderId: orderId,
-        url: `http://localhost:4200/surveys/${orderId}`,
+        url: `${process.env.SURVEY_PREFIX_URL}/surveys/${orderId}`,
         createdAt: new Date(),
         finishAt: undefined,
         isFinishedOrDue: false,
@@ -70,22 +85,69 @@ export class SurveyService {
 
       return new this.surveys({ ...survey }).save();
     } catch (error) {
-      console.log(error);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
   async finishSurvey(survey: SurveyFinishRequest): Promise<any> {
-    return await this.surveys
-      .findByIdAndUpdate(survey._id, {
-        isFinishedOrDue: true,
-        finishedAt: new Date(),
-        questions: survey.questions,
-        feedback: survey.feedback,
-      })
-      .exec();
+    try {
+      const exixtingSurvey = await this.surveys.findById(survey._id).exec();
+
+      if (!exixtingSurvey) {
+        return null;
+      }
+
+      return await this.surveys
+        .findByIdAndUpdate(survey._id, {
+          isFinishedOrDue: true,
+          finishedAt: new Date(),
+          questions: survey.questions,
+          feedback: survey.feedback,
+        })
+        .exec();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   async getQuestions(): Promise<QuestionDocument[]> {
     return await this.questions.find();
+  }
+
+  async validateOrder(orderId: string): Promise<SurveyDocument> {
+    try {
+      if (!isValidObjectId(orderId)) {
+        throw new HttpException('Order key is invalid', HttpStatus.NOT_FOUND);
+      }
+
+      const order = await this.orders.findById(orderId).exec();
+
+      if (order && order.status != OrderStatus.DELIVERIED) {
+        throw new HttpException(
+          'You are not allowed to be here',
+          HttpStatus.UNAUTHORIZED,
+        );
+      }
+
+      const survey = await this.surveys.findOne({ orderId: orderId }).exec();
+
+      if (!survey) {
+        throw new HttpException(
+          'There is no surveys for this order',
+          HttpStatus.NO_CONTENT,
+        );
+      }
+
+      if (survey && survey.isFinishedOrDue) {
+        throw new HttpException(
+          'Survey is already finished',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
+      return survey;
+    } catch (error) {
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
+    }
   }
 }

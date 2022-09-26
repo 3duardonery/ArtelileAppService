@@ -17,7 +17,7 @@ export class Survey {
   createdAt: Date;
 
   @Prop()
-  finishAt: Date;
+  finishedAt: Date;
 
   @Prop()
   isFinishedOrDue: boolean;
