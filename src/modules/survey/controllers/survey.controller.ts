@@ -32,17 +32,27 @@ export class SurveyController {
       return;
     }
 
-    res.status(HttpStatus.OK).json(response).send();
+    res.status(HttpStatus.OK).json(response);
   }
 
   @Get('validate')
   async validateOrder(@Query('orderId') orderId: string, @Res() res: Response) {
     const response = await this.surveyService.validateOrder(orderId);
 
-    return res.status(HttpStatus.OK).json(response).send();
+    return res.status(HttpStatus.OK).json(response);
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('finished')
+  async getFinishedSurvey(
+    @Query('orderId') orderId: string,
+    @Res() res: Response,
+  ) {
+    const response = await this.surveyService.getSurveyByOrderId(orderId);
+
+    return res.status(HttpStatus.OK).json(response);
+  }
+
   @Post('finish')
   async finishSurveyByOrderId(
     @Body() surveyFinishRequest: SurveyFinishRequest,
@@ -55,7 +65,7 @@ export class SurveyController {
       return;
     }
 
-    res.status(HttpStatus.OK).json(response).send();
+    res.status(HttpStatus.OK).json(response);
   }
 
   @UseGuards(JwtAuthGuard)

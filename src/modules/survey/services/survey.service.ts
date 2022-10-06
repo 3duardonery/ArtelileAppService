@@ -37,6 +37,12 @@ export class SurveyService {
     };
   }
 
+  async getSurveyByOrderId(orderId: string): Promise<any> {
+    const survey = await this.surveys.findOne({ orderId: orderId }).exec();
+
+    return survey;
+  }
+
   async createQuestion(question: QuestionRequest): Promise<QuestionDocument> {
     const response = await new this.questions({
       ...question,
@@ -75,7 +81,7 @@ export class SurveyService {
       const survey = {
         questions: questions,
         orderId: orderId,
-        url: `${process.env.SURVEY_PREFIX_URL}/surveys/${orderId}`,
+        url: `${process.env.SURVEY_PREFIX_URL}/survey/${orderId}`,
         createdAt: new Date(),
         finishAt: undefined,
         isFinishedOrDue: false,
@@ -91,10 +97,20 @@ export class SurveyService {
 
   async finishSurvey(survey: SurveyFinishRequest): Promise<any> {
     try {
+      if (!isValidObjectId(survey._id) || !isValidObjectId(survey.orderId)) {
+        throw new HttpException(
+          'Order key or Survey key invalid',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+
       const exixtingSurvey = await this.surveys.findById(survey._id).exec();
 
       if (!exixtingSurvey) {
-        return null;
+        throw new HttpException(
+          'There is no survey for this order',
+          HttpStatus.NOT_FOUND,
+        );
       }
 
       return await this.surveys
@@ -106,7 +122,7 @@ export class SurveyService {
         })
         .exec();
     } catch (error) {
-      console.log(error);
+      throw new HttpException(error, HttpStatus.BAD_REQUEST);
     }
   }
 
