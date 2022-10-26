@@ -38,9 +38,13 @@ export class SurveyService {
   }
 
   async getSurveyByOrderId(orderId: string): Promise<any> {
+    const order = await this.orders.findById(orderId).exec();
     const survey = await this.surveys.findOne({ orderId: orderId }).exec();
 
-    return survey;
+    return {
+      order: order,
+      survey: survey,
+    };
   }
 
   async createQuestion(question: QuestionRequest): Promise<QuestionDocument> {
