@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { OrderRequest, PaymentWay } from '../models/order-request';
 import { Order, OrderDocument } from '../schemas/order-schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Mongoose } from 'mongoose';
 import { Quote, QuoteDocument } from 'src/modules/quotes/schemas/quote-schema';
 import { Payment, PaymentDocument } from '../schemas/payment-schema';
 import { PaymentRequest } from '../models/payment-request';
@@ -135,6 +135,42 @@ export class OrdersService {
     }
   }
 
+  async getOrdersByQuery(
+    orderStatus: string,
+    orderName: string,
+    customerName: string,
+    limit: number,
+    page: number,
+  ): Promise<OrderResponse> {
+    try {
+      const total = (
+        await this.model.find(
+          this.getOrderFilter(orderName, orderStatus, customerName),
+        )
+      ).length;
+
+      const orders = await this.model
+        .find(this.getOrderFilter(orderName, orderStatus, customerName))
+        .limit(limit)
+        .skip(limit * page)
+        .sort({
+          orderedAt: -1,
+        })
+        .exec();
+
+      const response: OrderResponse = {
+        length: total,
+        pages: Math.ceil(total / limit),
+        data: orders,
+      };
+
+      return response;
+    } catch (e) {
+      Sentry.captureException(e);
+      return null;
+    }
+  }
+
   async getOrderById(orderId: string): Promise<OrderDocument> {
     try {
       return await this.model.findById(orderId).exec();
@@ -142,5 +178,24 @@ export class OrdersService {
       Sentry.captureException(e);
       return null;
     }
+  }
+
+  private getOrderFilter(
+    orderName: string,
+    orderStatus: string,
+    customerName: string,
+  ): any {
+    return {
+      status:
+        orderStatus != undefined && orderStatus != 'Todos'
+          ? orderStatus
+          : { $ne: null },
+      'quote.name':
+        orderName != undefined ? { $regex: orderName } : { $ne: null },
+      'quote.customer.name':
+        customerName != undefined
+          ? { $regex: customerName, $options: 'i' }
+          : { $ne: null },
+    };
   }
 }

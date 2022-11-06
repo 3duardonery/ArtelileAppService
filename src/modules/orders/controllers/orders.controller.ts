@@ -150,6 +150,26 @@ export class OrdersController {
     response.status(HttpStatus.OK).json(orders);
   }
 
+  @Get('search')
+  async getFilterPaginatedOrders(
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+    @Query('orderName') orderName: string,
+    @Query('orderStatus') orderStatus: string,
+    @Query('customerName') custmerName: string,
+    @Res() response: Response,
+  ) {
+    const orders = await this.orderService.getOrdersByQuery(
+      orderStatus,
+      orderName,
+      custmerName,
+      limit,
+      page,
+    );
+
+    response.status(HttpStatus.OK).json(orders);
+  }
+
   @Get(':orderId')
   async getOrderById(
     @Param('orderId') orderId: string,
