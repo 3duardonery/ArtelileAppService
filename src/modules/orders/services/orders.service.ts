@@ -191,7 +191,9 @@ export class OrdersService {
           ? orderStatus
           : { $ne: null },
       'quote.name':
-        orderName != undefined ? { $regex: orderName } : { $ne: null },
+        orderName != undefined
+          ? { $regex: orderName, $options: 'i' }
+          : { $ne: null },
       'quote.customer.name':
         customerName != undefined
           ? { $regex: customerName, $options: 'i' }

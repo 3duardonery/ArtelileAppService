@@ -43,6 +43,26 @@ export class QuotesController {
     return res.status(HttpStatus.OK).json(response);
   }
 
+  @Get('search')
+  async getQuotesByQuery(
+    @Query('limit') limit: number,
+    @Query('page') page: number,
+    @Query('quoteName') quoteName: string,
+    @Query('quoteStatus') quoteStatus: string,
+    @Query('customerName') customerName: string,
+    @Res() res: Response,
+  ) {
+    const response = await this.quotesService.getQuotesByQuery(
+      quoteStatus,
+      quoteName,
+      customerName,
+      limit,
+      page,
+    );
+
+    return res.status(HttpStatus.OK).json(response);
+  }
+
   @Get('id')
   async getQuotesById(@Query('quoteId') quoteId: string, @Res() res: Response) {
     const response = await this.quotesService.getQuoteById(quoteId);

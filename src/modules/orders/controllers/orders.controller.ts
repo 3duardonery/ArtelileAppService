@@ -156,13 +156,13 @@ export class OrdersController {
     @Query('page') page: number,
     @Query('orderName') orderName: string,
     @Query('orderStatus') orderStatus: string,
-    @Query('customerName') custmerName: string,
+    @Query('customerName') customerName: string,
     @Res() response: Response,
   ) {
     const orders = await this.orderService.getOrdersByQuery(
       orderStatus,
       orderName,
-      custmerName,
+      customerName,
       limit,
       page,
     );

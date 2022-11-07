@@ -41,6 +41,37 @@ export class QuotesService {
     };
   }
 
+  async getQuotesByQuery(
+    quoteStatus: string,
+    quoteName: string,
+    customerName: string,
+    limit: number,
+    page: number,
+  ): Promise<any> {
+    const total = (
+      await this.model.find(
+        this.getQuoteFilter(quoteName, quoteStatus, customerName),
+      )
+    ).length;
+
+    const quotes = await this.model
+      .find(this.getQuoteFilter(quoteName, quoteStatus, customerName))
+      .limit(limit)
+      .skip(limit * page)
+      .sort({
+        createdAt: -1,
+      })
+      .exec();
+
+    const response = {
+      length: total,
+      pages: Math.ceil(total / limit),
+      data: quotes,
+    };
+
+    return response;
+  }
+
   async cancelQuote(quoteId: string): Promise<any> {
     return await this.model
       .findByIdAndUpdate(quoteId, {
@@ -59,5 +90,26 @@ export class QuotesService {
 
   async findById(quoteId: string): Promise<QuoteDocument> {
     return await this.model.findById(quoteId).exec();
+  }
+
+  private getQuoteFilter(
+    quoteName: string,
+    quoteStatus: string,
+    customerName: string,
+  ): any {
+    return {
+      status:
+        quoteStatus != undefined && quoteStatus != 'Todos'
+          ? quoteStatus
+          : { $ne: null },
+      name:
+        quoteName != undefined
+          ? { $regex: quoteName, $options: 'i' }
+          : { $ne: null },
+      'customer.name':
+        customerName != undefined
+          ? { $regex: customerName, $options: 'i' }
+          : { $ne: null },
+    };
   }
 }
